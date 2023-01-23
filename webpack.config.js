@@ -36,7 +36,8 @@ const config = {
 	},
 	resolve: {
 		modules: [path.resolve('./src'), path.resolve('./node_modules')],
-		extensions: ['.json', '.js', '.ts']
+		extensions: ['.json', '.js', '.ts'],
+		fallback: { "assert": false },
 	},
 	plugins: plugins,
 	externals: {
