@@ -1,19 +1,13 @@
 export class SequenceMatcherModel {
-    private matchingBlocks: any;
-    private opcodes: any;
-    private fullbcount: any;
-    private junk: any = {};
     private b2j: any;
 
-    constructor(private isjunk: any, private a: any, private b: any) {
-        this.setSeqs();
+    constructor(private a: any, private b: any) {
+        this._chainB();
     }
 
-    public GetGroupedOpcodes(n) {
+    public GetGroupedOpcodes() {
         let codes, group, groups, i1, i2, j1, j2, nn, tag, _i, _len, _ref, _ref1, _ref2, _ref3;
-        if (n == null) {
-            n = 3;
-        }
+        const n = 3;
 
         codes = this.getOpCodes();
         if (!codes.length) {
@@ -65,11 +59,9 @@ export class SequenceMatcherModel {
 
     private getOpCodes(): any {
         let ai, answer, bj, i, j, size, tag, _i, _len, _ref, _ref1, _ref2;
-        if (this.opcodes) {
-            return this.opcodes;
-        }
         i = j = 0;
-        this.opcodes = answer = [];
+
+        answer = [];
         _ref = this.getMatchingBlocks();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             _ref1 = _ref[_i];
@@ -99,9 +91,7 @@ export class SequenceMatcherModel {
 
     private getMatchingBlocks(): any {
         let ahi, alo, bhi, blo, i, i1, i2, j, j1, j2, k, k1, k2, la, lb, matchingBlocks, nonAdjacent, queue, x, _i, _len, _ref, _ref1, _ref2, _ref3, _ref4;
-        if (this.matchingBlocks) {
-            return this.matchingBlocks;
-        }
+
         _ref = [this.a.length, this.b.length];
         la = _ref[0];
         lb = _ref[1];
@@ -186,22 +176,13 @@ export class SequenceMatcherModel {
             }
             j2len = newj2len;
         }
-        while (besti > alo && bestj > blo && !this.junk[b[bestj - 1]] && a[besti - 1] === b[bestj - 1]) {
+        while (besti > alo && bestj > blo && a[besti - 1] === b[bestj - 1]) {
             _ref4 = [besti - 1, bestj - 1, bestsize + 1];
             besti = _ref4[0];
             bestj = _ref4[1];
             bestsize = _ref4[2];
         }
-        while (besti + bestsize < ahi && bestj + bestsize < bhi && !this.junk[b[bestj + bestsize]] && a[besti + bestsize] === b[bestj + bestsize]) {
-            bestsize++;
-        }
-        while (besti > alo && bestj > blo && !!this.junk[b[bestj - 1]] && a[besti - 1] === b[bestj - 1]) {
-            _ref5 = [besti - 1, bestj - 1, bestsize + 1];
-            besti = _ref5[0];
-            bestj = _ref5[1];
-            bestsize = _ref5[2];
-        }
-        while (besti + bestsize < ahi && bestj + bestsize < bhi && !!this.junk[b[bestj + bestsize]] && a[besti + bestsize] === b[bestj + bestsize]) {
+        while (besti + bestsize < ahi && bestj + bestsize < bhi && a[besti + bestsize] === b[bestj + bestsize]) {
             bestsize++;
         }
         return [besti, bestj, bestsize];
@@ -224,40 +205,14 @@ export class SequenceMatcherModel {
         return la - lb;
     }
 
-    private setSeqs(): void {
-        this.setSeq1();
-        this.setSeq2();
-    }
-
-    private setSeq1(): any {
-        return this.matchingBlocks = this.opcodes = null;
-    }
-
-    private setSeq2(): any {
-        this.fullbcount = null;
-        return this._chainB();
-    }
-
     private _chainB(): void {
-        let b, elt, i, indices, isjunk, _i, _j, _len, _len1, _ref;
+        let b, elt, i, indices, _i, _len;
         b = this.b;
         this.b2j = {};
         for (i = _i = 0, _len = b.length; _i < _len; i = ++_i) {
             elt = b[i];
             indices = !!this.b2j[elt] ? this.b2j[elt] : this.b2j[elt] = [];
             indices.push(i);
-        }
-        this.junk = {};
-        isjunk = this.isjunk;
-        if (isjunk) {
-            _ref = Object.keys(this.b2j);
-            for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-                elt = _ref[_j];
-                if (isjunk(elt)) {
-                    this.junk[elt] = true;
-                    delete this.b2j[elt];
-                }
-            }
         }
     }
 }

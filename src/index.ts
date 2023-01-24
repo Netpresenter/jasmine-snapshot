@@ -213,48 +213,35 @@ export function _formatRangeUnified(start, stop) {
     return "" + beginning + "," + length;
 }
 
-export function unifiedDiff(a, b, _arg?) {
-    let file1Range, file2Range, first, fromdate, fromfile, fromfiledate, group, i1, i2, j1, j2, last, line, lines, lineterm, n, started, tag, todate, tofile, tofiledate, _i, _j, _k, _l, _len, _len1,
-        _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
-    _ref = _arg != null ? _arg : {}, fromfile = _ref.fromfile, tofile = _ref.tofile, fromfiledate = _ref.fromfiledate, tofiledate = _ref.tofiledate, n = _ref.n, lineterm = _ref.lineterm;
+export function unifiedDiff(a, b) {
+    let file1Range, file2Range, first, group, i1, i2, j1, j2, last, line, tag, _i, _j, _k, _l, _len, _len1,
+        _len2, _len3, _len4, _m, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
 
-
-    if (fromfile == null) {
-        fromfile = "";
-    }
-    if (tofile == null) {
-        tofile = "";
-    }
-    if (fromfiledate == null) {
-        fromfiledate = "";
-    }
-    if (tofiledate == null) {
-        tofiledate = "";
-    }
-    if (n == null) {
-        n = 3;
-    }
-    if (lineterm == null) {
-        lineterm = "\n";
-    }
-    lines = [];
-    started = false;
-    _ref1 = (new SequenceMatcherModel(false, a, b)).GetGroupedOpcodes(n);
+    let lineterm = "\n";
+    let lines: string[] = [];
+    let started = false;
+    _ref1 = new SequenceMatcherModel(a, b).GetGroupedOpcodes();
     for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         group = _ref1[_i];
         if (!started) {
             started = true;
-            fromdate = fromfiledate ? "\t" + fromfiledate : "";
-            todate = tofiledate ? "\t" + tofiledate : "";
-            lines.push("--- " + fromfile + fromdate + lineterm);
-            lines.push("+++ " + tofile + todate + lineterm);
+            lines.push("--- " + lineterm);
+            lines.push("+++ " + lineterm);
         }
-        _ref2 = [group[0], group[group.length - 1]], first = _ref2[0], last = _ref2[1];
+        _ref2 = [group[0], group[group.length - 1]];
+        first = _ref2[0];
+        last = _ref2[1];
         file1Range = _formatRangeUnified(first[1], last[2]);
         file2Range = _formatRangeUnified(first[3], last[4]);
         lines.push("@@ -" + file1Range + " +" + file2Range + " @@" + lineterm);
         for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
-            _ref3 = group[_j], tag = _ref3[0], i1 = _ref3[1], i2 = _ref3[2], j1 = _ref3[3], j2 = _ref3[4];
+            _ref3 = group[_j];
+            tag = _ref3[0];
+            i1 = _ref3[1];
+            i2 = _ref3[2];
+            j1 = _ref3[3];
+            j2 = _ref3[4];
+
             if (tag === "equal") {
                 _ref4 = a.slice(i1, i2);
                 for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
