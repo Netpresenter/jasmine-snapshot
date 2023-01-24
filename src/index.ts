@@ -147,7 +147,7 @@ jasmine.getEnv().addReporter({
         current_level--;
 
         if (current_suite && current_level < current_suite.level) {
-            if (current_suite.hasFailure) {
+            if (current_suite.hasFailure()) {
                 // console.error(current_suite.getText());
             }
 
@@ -157,7 +157,7 @@ jasmine.getEnv().addReporter({
     },
     jasmineDone: function (results) {
         if (current_suite) {
-            if (current_suite.hasFailure) {
+            if (current_suite.hasFailure()) {
                 // console.error(current_suite.getText());
             }
 
