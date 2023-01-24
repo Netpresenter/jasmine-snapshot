@@ -37,7 +37,9 @@ const config = {
 	resolve: {
 		modules: [path.resolve('./src'), path.resolve('./node_modules')],
 		extensions: ['.json', '.js', '.ts'],
-		fallback: { "assert": false },
+		fallback: {
+			assert: require.resolve('assert'),
+		},
 	},
 	plugins: plugins,
 	externals: {
