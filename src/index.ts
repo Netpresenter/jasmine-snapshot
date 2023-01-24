@@ -2,24 +2,24 @@ import * as difflib from "difflib";
 import { xml, json } from "vkbeautify";
 import X2JS = require("x2js");
 import "./overrideconsole";
+import { SequenceMatcherModel } from "./sequence-matcher.model";
 
 let current_snapshot_object: { [key: string]: string } = {};
-export function registerSnapshots(snapshot_object: { [key: string]: string }, name: string)
-{
+
+export function registerSnapshots(snapshot_object: { [key: string]: string }, name: string) {
     current_snapshot_object = snapshot_object;
     current_suite = new AutoSnapshotSuite(current_level, name);
 }
 
-class AutoSnapshot
-{
+class AutoSnapshot {
     public key: string;
     public text: string;
     public diff: Array<string>;
 }
 
 let auto_snapshot_siute_history = new Array<AutoSnapshotSuite>();
-class AutoSnapshotSuite
-{
+
+class AutoSnapshotSuite {
     public snapshots = Array<AutoSnapshot>();
     public level = 0;
     private fail_counter_for_autosnapshot = 0;
@@ -27,22 +27,17 @@ class AutoSnapshotSuite
     private last_automagic_snapshot_number = 0;
     private name: string;
 
-    constructor(snapshot_level: number, suite_name: string)
-    {
+    constructor(snapshot_level: number, suite_name: string) {
         this.level = snapshot_level;
         this.name = suite_name;
     }
 
-    public getSnapshotAutomagically_saveActual(actual: string): string
-    {
+    public getSnapshotAutomagically_saveActual(actual: string): string {
         let auto_snapshot = new AutoSnapshot();
 
-        if (current_spec === this.last_automagic_snapshot_spec)
-        {
+        if (current_spec === this.last_automagic_snapshot_spec) {
             this.last_automagic_snapshot_number++;
-        }
-        else
-        {
+        } else {
             this.last_automagic_snapshot_number = 1;
             this.last_automagic_snapshot_spec = current_spec;
         }
@@ -55,31 +50,26 @@ class AutoSnapshotSuite
         return snapshot ? snapshot : "";
     }
 
-    public hasFailure(): boolean
-    {
+    public hasFailure(): boolean {
         return this.fail_counter_for_autosnapshot > 0;
     }
 
-    public reportFailure(diff: Array<string>)
-    {
+    public reportFailure(diff: Array<string>) {
         this.snapshots[this.snapshots.length - 1].diff = diff;
         this.fail_counter_for_autosnapshot++;
     }
 
-    public getText(): string
-    {
+    public getText(): string {
         let snapshot_file_text = "\n**** If actual is valid, update your snapshot with the following ****\n{";
 
         let has_snapshots = false;
 
-        for (let snapshot of this.snapshots)
-        {
+        for (let snapshot of this.snapshots) {
             has_snapshots = true;
             snapshot_file_text += `\n\t"${snapshot.key}": \`${snapshot.text}\`,`;
         }
 
-        if (has_snapshots)
-        {
+        if (has_snapshots) {
             snapshot_file_text = snapshot_file_text.slice(0, snapshot_file_text.length - 1);
             snapshot_file_text += "\n}\n\n";
         }
@@ -87,47 +77,36 @@ class AutoSnapshotSuite
         return snapshot_file_text;
     }
 
-    public pushToHistory()
-    {
+    public pushToHistory() {
         auto_snapshot_siute_history.push(this);
     }
 
-    public getHTML(): string
-    {
-        if(typeof document !== 'undefined') {
+    public getHTML(): string {
+        if (typeof document !== 'undefined') {
             document.body.style.fontFamily = "Courier New";
             document.body.style.whiteSpace = "nowrap";
         }
-        if (!this.name) { throw "name not defined for snapshot suite"; }
+        if (!this.name) {
+            throw "name not defined for snapshot suite";
+        }
 
-        if (!this.hasFailure())
-        {
+        if (!this.hasFailure()) {
             return `<p style="color: green; font-size: 25px; font-weight: bold;">===Auto snapshot suite, ${this.name}, has no problems!===</p>`;
         }
 
         let snapshot_file_html = `<p style="color: red; font-size: 25px; font-weight: bold;">===Suite, ${this.name}, had problems===</p>`;
 
-        this.snapshots.forEach((snapshot) =>
-        {
-            if (snapshot.diff)
-            {
+        this.snapshots.forEach((snapshot) => {
+            if (snapshot.diff) {
                 snapshot_file_html += `<div>>Test: "${snapshot.key}" did not match the snapshot:</div><br //>`;
-                snapshot.diff.forEach((d) =>
-                {
-                    if (d.length >= 3 && (d.slice(0, 3) === "---" || d.slice(0, 3) === "+++") || d.slice(0, 2) === "@@")
-                    {
+                snapshot.diff.forEach((d) => {
+                    if (d.length >= 3 && (d.slice(0, 3) === "---" || d.slice(0, 3) === "+++") || d.slice(0, 2) === "@@") {
                         return;
-                    }
-                    else if (d.charAt(0) === "-")
-                    {
+                    } else if (d.charAt(0) === "-") {
                         snapshot_file_html += `<span style="color: red">${d.replace(/&nbsp;/g, "&amp;nbsp;").replace(/ /g, "&nbsp;")}</span><br //>`;
-                    }
-                    else if (d.charAt(0) === "+")
-                    {
+                    } else if (d.charAt(0) === "+") {
                         snapshot_file_html += `<span style="color: green">${d.replace(/&nbsp;/g, "&amp;nbsp;").replace(/ /g, "&nbsp;")}</span><br //>`;
-                    }
-                    else
-                    {
+                    } else {
                         snapshot_file_html += `${d.replace(/&nbsp;/g, "&amp;nbsp;").replace(/ /g, "&nbsp;")}<br //>`;
                     }
                 });
@@ -139,14 +118,12 @@ class AutoSnapshotSuite
 
         let has_snapshots = false;
 
-        for (let snapshot of this.snapshots)
-        {
+        for (let snapshot of this.snapshots) {
             has_snapshots = true;
             snapshot_file_html += `<br //>&nbsp;&nbsp;&nbsp;&nbsp;"${snapshot.key}": \`${snapshot.text.replace(/&nbsp;/g, "&amp;nbsp;")}\`,`;
         }
 
-        if (has_snapshots)
-        {
+        if (has_snapshots) {
             snapshot_file_html = snapshot_file_html.slice(0, snapshot_file_html.length - 1);
             snapshot_file_html += "<br //>}</div></p>";
         }
@@ -161,22 +138,17 @@ let current_suite: AutoSnapshotSuite | null;
 let current_spec = "";
 let current_level = 0;
 jasmine.getEnv().addReporter({
-    suiteStarted: function (result)
-    {
+    suiteStarted: function (result) {
         current_level++;
     },
-    specStarted: function (result)
-    {
+    specStarted: function (result) {
         current_spec = result.fullName;
     },
-    suiteDone: function (result)
-    {
+    suiteDone: function (result) {
         current_level--;
 
-        if (current_suite && current_level < current_suite.level)
-        {
-            if (current_suite.hasFailure)
-            {
+        if (current_suite && current_level < current_suite.level) {
+            if (current_suite.hasFailure) {
                 // console.error(current_suite.getText());
             }
 
@@ -184,12 +156,9 @@ jasmine.getEnv().addReporter({
             current_suite = null;
         }
     },
-    jasmineDone: function (results)
-    {
-        if (current_suite)
-        {
-            if (current_suite.hasFailure)
-            {
+    jasmineDone: function (results) {
+        if (current_suite) {
+            if (current_suite.hasFailure) {
                 // console.error(current_suite.getText());
             }
 
@@ -197,18 +166,16 @@ jasmine.getEnv().addReporter({
             current_suite = null;
         }
 
-        if (auto_snapshot_siute_history.length === 0)
-        {
+        if (auto_snapshot_siute_history.length === 0) {
             return;
         }
 
         let html_summary = auto_snapshot_siute_history.reduce(
-            (prev_html, curr_suite) =>
-            {
+            (prev_html, curr_suite) => {
                 return prev_html + "<br //>" + curr_suite.getHTML();
             }, "");
 
-        if(typeof document !== 'undefined') {
+        if (typeof document !== 'undefined') {
             document.body.innerHTML = html_summary + document.body.innerHTML;
         } else {
             console.log(html_summary);
@@ -223,22 +190,107 @@ jasmine.getEnv().addReporter({
  */
 export let KeyExceptionList = ["typeof"];
 
-export function ResetExceptionList()
-{
+export function ResetExceptionList() {
     KeyExceptionList = ["typeof"];
 }
 
 declare var console;
 
-export function MatchesSnapshot(snapshot: string, actual: string, automagic?: boolean)
-{
-    if (actual !== snapshot)
-    {
-        let diff: string[] = difflib.unifiedDiff(snapshot.split("\n"), actual.split("\n"));
 
-        if (automagic)
-        {
-            if (!current_suite) { throw "autoagic snapshot with no registered snapshot object"; }
+export function _formatRangeUnified(start, stop) {
+    /*
+      Convert range to the "ed" format'
+    */
+
+    let beginning, length;
+    beginning = start + 1;
+    length = stop - start;
+    if (length === 1) {
+        return "" + beginning;
+    }
+    if (!length) {
+        beginning--;
+    }
+    return "" + beginning + "," + length;
+}
+
+export function unifiedDiff(a, b, _arg?) {
+    let file1Range, file2Range, first, fromdate, fromfile, fromfiledate, group, i1, i2, j1, j2, last, line, lines, lineterm, n, started, tag, todate, tofile, tofiledate, _i, _j, _k, _l, _len, _len1,
+        _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
+    _ref = _arg != null ? _arg : {}, fromfile = _ref.fromfile, tofile = _ref.tofile, fromfiledate = _ref.fromfiledate, tofiledate = _ref.tofiledate, n = _ref.n, lineterm = _ref.lineterm;
+
+
+    if (fromfile == null) {
+        fromfile = "";
+    }
+    if (tofile == null) {
+        tofile = "";
+    }
+    if (fromfiledate == null) {
+        fromfiledate = "";
+    }
+    if (tofiledate == null) {
+        tofiledate = "";
+    }
+    if (n == null) {
+        n = 3;
+    }
+    if (lineterm == null) {
+        lineterm = "\n";
+    }
+    lines = [];
+    started = false;
+    _ref1 = (new SequenceMatcherModel(false, a, b)).GetGroupedOpcodes(n);
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        group = _ref1[_i];
+        if (!started) {
+            started = true;
+            fromdate = fromfiledate ? "\t" + fromfiledate : "";
+            todate = tofiledate ? "\t" + tofiledate : "";
+            lines.push("--- " + fromfile + fromdate + lineterm);
+            lines.push("+++ " + tofile + todate + lineterm);
+        }
+        _ref2 = [group[0], group[group.length - 1]], first = _ref2[0], last = _ref2[1];
+        file1Range = _formatRangeUnified(first[1], last[2]);
+        file2Range = _formatRangeUnified(first[3], last[4]);
+        lines.push("@@ -" + file1Range + " +" + file2Range + " @@" + lineterm);
+        for (_j = 0, _len1 = group.length; _j < _len1; _j++) {
+            _ref3 = group[_j], tag = _ref3[0], i1 = _ref3[1], i2 = _ref3[2], j1 = _ref3[3], j2 = _ref3[4];
+            if (tag === "equal") {
+                _ref4 = a.slice(i1, i2);
+                for (_k = 0, _len2 = _ref4.length; _k < _len2; _k++) {
+                    line = _ref4[_k];
+                    lines.push(" " + line);
+                }
+                continue;
+            }
+            if (tag === "replace" || tag === "delete") {
+                _ref5 = a.slice(i1, i2);
+                for (_l = 0, _len3 = _ref5.length; _l < _len3; _l++) {
+                    line = _ref5[_l];
+                    lines.push("-" + line);
+                }
+            }
+            if (tag === "replace" || tag === "insert") {
+                _ref6 = b.slice(j1, j2);
+                for (_m = 0, _len4 = _ref6.length; _m < _len4; _m++) {
+                    line = _ref6[_m];
+                    lines.push("+" + line);
+                }
+            }
+        }
+    }
+    return lines;
+}
+
+export function MatchesSnapshot(snapshot: string, actual: string, automagic?: boolean) {
+    if (actual !== snapshot) {
+        let diff: string[] = unifiedDiff(snapshot.split("\n"), actual.split("\n"));
+
+        if (automagic) {
+            if (!current_suite) {
+                throw "autoagic snapshot with no registered snapshot object";
+            }
 
             current_suite.reportFailure(diff);
         }
@@ -246,19 +298,16 @@ export function MatchesSnapshot(snapshot: string, actual: string, automagic?: bo
         let diff_string = "\n";
         diff_string += `**** ${current_spec} diff *****\n\n`;
 
-        diff.forEach(d =>
-        {
+        diff.forEach(d => {
             if (d !== "--- \n" && d !== "+++ \n" &&
-                !(d.length > 5 && d.slice(0, 2) === "@@"))
-            {
+                !(d.length > 5 && d.slice(0, 2) === "@@")) {
                 diff_string += d + "\n";
             }
         });
 
         diff_string += "\n";
 
-        if (!automagic)
-        {
+        if (!automagic) {
             let one_line_actual = create_one_liner(actual);
 
             diff_string += "**** If the Actual is valid, update the snapshot with this ****\n";
@@ -270,11 +319,9 @@ export function MatchesSnapshot(snapshot: string, actual: string, automagic?: bo
     }
 }
 
-function create_one_liner(actual: string)
-{
+function create_one_liner(actual: string) {
     let one_line_actual = actual.replace(/\n/g, "").replace(/\t/g, "").replace(/\\"/g, `\\\\\\"`);
-    while (one_line_actual.indexOf("  ") !== -1)
-    {
+    while (one_line_actual.indexOf("  ") !== -1) {
         one_line_actual = one_line_actual.replace(/(  )/g, " ");
     }
 
@@ -286,8 +333,7 @@ function create_one_liner(actual: string)
  * @param snapshot the snapshot to compare the actual to
  * @param actual the actual xml/html string to compare to the snapshot
  */
-export function MatchesXMLSnapshot(snapshot: string, actual: string)
-{
+export function MatchesXMLSnapshot(snapshot: string, actual: string) {
     expectxml(actual).toMatchSnapshot(snapshot);
 }
 
@@ -296,8 +342,7 @@ export function MatchesXMLSnapshot(snapshot: string, actual: string)
  * @param snapshot the snapshot to compare the actual to
  * @param actual the json string to compare to the snapshot
  */
-export function MatchesJSONSnapshot(snapshot: string, actual: string)
-{
+export function MatchesJSONSnapshot(snapshot: string, actual: string) {
     let prettyActual = actual ? json(actual) : actual;
     let prettySnapshot = snapshot ? json(snapshot) : snapshot;
 
@@ -311,83 +356,69 @@ export function MatchesJSONSnapshot(snapshot: string, actual: string)
  * @param snapshot the snapshot to compare the actual to
  * @param actual The actual JS object to compare to the snapshot
  */
-export function MatchesJSSnapshot(snapshot: string, actual: any)
-{
+export function MatchesJSSnapshot(snapshot: string, actual: any) {
     expectjs(actual).toMatchSnapshot(snapshot);
 }
 
-export function expectjs(actual: Object)
-{
+export function expectjs(actual: Object) {
     return new SnapshotJSInner(actual);
 }
 
-export function expectxml(xml_actual: string)
-{
+export function expectxml(xml_actual: string) {
     return new SnapshotXMLInner(xml_actual);
 }
 
-abstract class SnapshotInner<T extends Object | string>
-{
+abstract class SnapshotInner<T extends Object | string> {
     protected actual: T;
 
-    constructor(actual: T)
-    {
+    constructor(actual: T) {
         this.actual = actual;
     }
 
-    public afterApplying(transformFunction: (actual: T) => T)
-    {
+    public afterApplying(transformFunction: (actual: T) => T) {
         this.actual = transformFunction(this.actual);
         return this;
     }
 }
 
-export class SnapshotJSInner extends SnapshotInner<Object>
-{
+export class SnapshotJSInner extends SnapshotInner<Object> {
     private parsed_values = new Array<object>();
 
-    constructor(actual: Object)
-    {
+    constructor(actual: Object) {
         super(actual);
         this.actual = actual;
     }
 
-    public toMatchSnapshot(snapshot?: string): void
-    {
+    public toMatchSnapshot(snapshot?: string): void {
         let prettyActual = this.actual ? json(this.getOrderedStringifyAndClean()) : "";
 
         let prettySnapshot = snapshot;
         let use_autosnapshot = false;
-        if (snapshot === null || snapshot === undefined)
-        {
-            if (!current_suite) { throw "Use of autosnapshot without registering snapshot object"; }
+        if (snapshot === null || snapshot === undefined) {
+            if (!current_suite) {
+                throw "Use of autosnapshot without registering snapshot object";
+            }
 
             use_autosnapshot = true;
             let auto_snapshot = current_suite.getSnapshotAutomagically_saveActual(prettyActual);
             prettySnapshot = auto_snapshot ? json(auto_snapshot) : "";
-        }
-        else
-        {
+        } else {
             prettySnapshot = snapshot ? json(snapshot) : snapshot;
         }
 
         MatchesSnapshot(prettySnapshot, prettyActual, use_autosnapshot);
     }
 
-    private getOrderedStringifyAndClean()
-    {
+    private getOrderedStringifyAndClean() {
         let keys = this.collectAllKeysAndRemoveCircular(this.actual);
         return JSON.stringify(this.actual, keys);
     }
 
-    private collectAllKeysAndRemoveCircular(js_object: any)
-    {
+    private collectAllKeysAndRemoveCircular(js_object: any) {
         const allKeys = new Array<string>();
 
-        let json = JSON.stringify(js_object, (key: string, val: any) =>
-        {
-            if (this.isIEPooOrCurcularReferences(key, val))
-            {
+        let json = JSON.stringify(js_object, (key: string, val: any) => {
+            if (this.isIEPooOrCurcularReferences(key, val)) {
                 return;
             }
 
@@ -400,31 +431,22 @@ export class SnapshotJSInner extends SnapshotInner<Object>
         return allKeys.sort((a: string, b: string) => (a > b) ? 1 : -1);
     }
 
-    private isIEPooOrCurcularReferences(key, value)
-    {
-        if (typeof key === "string" && KeyExceptionList.some((ex) => key.indexOf(ex) !== -1))
-        {
+    private isIEPooOrCurcularReferences(key, value) {
+        if (typeof key === "string" && KeyExceptionList.some((ex) => key.indexOf(ex) !== -1)) {
             return true;
-        }
-        else if (this.IsCurcularDependency(value))
-        {
+        } else if (this.IsCurcularDependency(value)) {
             return true;
         }
 
         return false;
     }
 
-    private IsCurcularDependency(value: any)
-    {
-        if (value && typeof value === "object")
-        {
-            if (this.parsed_values.indexOf(value) === -1)
-            {
+    private IsCurcularDependency(value: any) {
+        if (value && typeof value === "object") {
+            if (this.parsed_values.indexOf(value) === -1) {
                 this.parsed_values.push(value);
                 return false;
-            }
-            else
-            {
+            } else {
                 return true;
             }
         }
@@ -433,16 +455,13 @@ export class SnapshotJSInner extends SnapshotInner<Object>
     }
 }
 
-export class SnapshotXMLInner extends SnapshotInner<string>
-{
-    constructor(xml_actual: string)
-    {
+export class SnapshotXMLInner extends SnapshotInner<string> {
+    constructor(xml_actual: string) {
         super(xml_actual);
         this.actual = xml_actual;
     }
 
-    public toMatchSnapshot(snapshot?: string): void
-    {
+    public toMatchSnapshot(snapshot?: string): void {
         const X2JS2 = X2JS as any; // don't hate me, their typings suck
         const x2js = new X2JS2();
 
