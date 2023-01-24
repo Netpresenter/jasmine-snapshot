@@ -1,5 +1,4 @@
-import * as difflib from "difflib";
-import { xml, json } from "vkbeautify";
+import { json } from "vkbeautify";
 import X2JS = require("x2js");
 import "./overrideconsole";
 import { SequenceMatcherModel } from "./sequence-matcher.model";

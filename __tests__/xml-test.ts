@@ -1,4 +1,3 @@
-import * as difflib from "difflib";
 import { expectxml, registerSnapshots } from "../src/index";
 
 declare var fail: (message: string) => void;

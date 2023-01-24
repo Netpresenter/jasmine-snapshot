@@ -1,4 +1,3 @@
-import * as difflib from "difflib";
 import { MatchesJSSnapshot } from "../src/index";
 
 declare var fail: (message: string) => void;

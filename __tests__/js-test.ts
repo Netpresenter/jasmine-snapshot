@@ -1,4 +1,3 @@
-import * as difflib from "difflib";
 import { MatchesJSSnapshot, KeyExceptionList, ResetExceptionList, expectjs, registerSnapshots } from "../src/index";
 import { snapshots } from "./js-test.snapshots";
 
