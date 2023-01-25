@@ -18,6 +18,7 @@
         },
         {
             "args": [
+                "--optimize-minimize"
             ],
             "suppressTaskName": true,
             "taskName": "webpack dist",

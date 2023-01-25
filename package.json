@@ -1,11 +1,9 @@
 {
-  "name": "jasmine-snapshot",
-  "version": "1.8.1",
+  "name": "jasmine-snapshot-np",
+  "version": "1.0.0",
   "description": "A snapshotting library similar to what jest offers but for Jasmine 2 instead. Written in Typescript",
   "main": "lib/jasmine-snapshot.min.js",
-  "typings": [
-    "index.d.ts"
-  ],
+  "typings": "index.d.ts",
   "scripts": {
     "build": "webpack --env build",
     "dev": "webpack --progress --colors --watch --env dev",

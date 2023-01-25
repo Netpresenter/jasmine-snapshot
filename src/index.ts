@@ -214,8 +214,6 @@ export function _formatRangeUnified(start, stop) {
 }
 
 export function unifiedDiff(a, b) {
-    console.log(a);
-    console.log(b);
     let file1Range, file2Range, first, group, i1, i2, j1, j2, last, line, tag, _i, _j, _k, _l, _len, _len1,
         _len2, _len3, _len4, _m, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6;
 
@@ -268,7 +266,7 @@ export function unifiedDiff(a, b) {
             }
         }
     }
-    console.log(lines);
+
     return lines;
 }
 
