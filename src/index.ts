@@ -379,7 +379,10 @@ export class SnapshotJSInner extends SnapshotInner<Object> {
     }
 
     public toMatchSnapshot(snapshot?: string): void {
-        let prettyActual = this.actual ? json(this.getOrderedStringifyAndClean()) : "";
+        let prettyActual = this.actual ? this.getOrderedStringifyAndClean() : "";
+        if (prettyActual) {
+            prettyActual = JSON.stringify(JSON.parse(prettyActual), null, "\n");
+        }
 
         let prettySnapshot = snapshot;
         let use_autosnapshot = false;
@@ -390,9 +393,9 @@ export class SnapshotJSInner extends SnapshotInner<Object> {
 
             use_autosnapshot = true;
             let auto_snapshot = current_suite.getSnapshotAutomagically_saveActual(prettyActual);
-            prettySnapshot = auto_snapshot ? json(auto_snapshot) : "";
+            prettySnapshot = auto_snapshot ? JSON.stringify(JSON.parse(auto_snapshot), null, "\n") : "";
         } else {
-            prettySnapshot = snapshot ? json(snapshot) : snapshot;
+            prettySnapshot = snapshot ? JSON.stringify(JSON.parse(snapshot), null, "\n") : snapshot;
         }
 
         MatchesSnapshot(prettySnapshot, prettyActual, use_autosnapshot);
